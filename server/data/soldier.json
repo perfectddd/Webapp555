@@ -1,0 +1,80 @@
+﻿[
+    {
+        "ID":  "1",
+        "militaryfull":  "ทหารบก",
+        "military":  "ทบ.1",
+        "mark":  "ท.บ."
+    },
+    {
+        "ID":  "10",
+        "militaryfull":  "ทหารบก",
+        "military":  "ทบ.1 ออนไลน์",
+        "mark":  "ท.บ."
+    },
+    {
+        "ID":  "11",
+        "militaryfull":  "ทหารบก",
+        "military":  "ทบ.2 ออนไลน์",
+        "mark":  "ท.บ."
+    },
+    {
+        "ID":  "12",
+        "militaryfull":  "ทหารเรือ",
+        "military":  "ทร.1 ออนไลน์",
+        "mark":  "ท.ร."
+    },
+    {
+        "ID":  "13",
+        "militaryfull":  "ทหารอากาศ",
+        "military":  "ทอ.1 ออนไลน์",
+        "mark":  "ท.อ."
+    },
+    {
+        "ID":  "2",
+        "militaryfull":  "ทหารบก",
+        "military":  "ทบ.2",
+        "mark":  "ท.บ."
+    },
+    {
+        "ID":  "3",
+        "militaryfull":  "ทหารอากาศ",
+        "military":  "ทอ.1",
+        "mark":  "ท.อ."
+    },
+    {
+        "ID":  "4",
+        "militaryfull":  "ทหารอากาศ",
+        "military":  "ทอ.2",
+        "mark":  "ท.อ."
+    },
+    {
+        "ID":  "5",
+        "militaryfull":  "ทหารเรือ",
+        "military":  "ทร.1",
+        "mark":  "ท.ร."
+    },
+    {
+        "ID":  "6",
+        "militaryfull":  "ทหารเรือ",
+        "military":  "ทร.2",
+        "mark":  "ท.ร."
+    },
+    {
+        "ID":  "7",
+        "militaryfull":  "ทหารเรือ",
+        "military":  "ทร.3",
+        "mark":  "ท.ร."
+    },
+    {
+        "ID":  "8",
+        "militaryfull":  "ทหารเรือ",
+        "military":  "ทร.4",
+        "mark":  "ท.ร."
+    },
+    {
+        "ID":  "9",
+        "militaryfull":  "ตำรวจ",
+        "military":  "ตร.",
+        "mark":  "ต.ร."
+    }
+]

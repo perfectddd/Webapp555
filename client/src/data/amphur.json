@@ -1,0 +1,137 @@
+﻿[
+    {
+        "amphur_id":  583,
+        "amphur_code":  5501,
+        "amphur_th":  "เมืองน่าน",
+        "amphur_en":  "Mueang nan",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  584,
+        "amphur_code":  5502,
+        "amphur_th":  "แม่จริม",
+        "amphur_en":  "Mae chrim",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  585,
+        "amphur_code":  5503,
+        "amphur_th":  "บ้านหลวง",
+        "amphur_en":  "Ban luang",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  586,
+        "amphur_code":  5504,
+        "amphur_th":  "นาน้อย",
+        "amphur_en":  "na noi",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  587,
+        "amphur_code":  5505,
+        "amphur_th":  "ปัว",
+        "amphur_en":  "Pua",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  588,
+        "amphur_code":  5506,
+        "amphur_th":  "ท่าวังผา",
+        "amphur_en":  "Tha wang pha",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  589,
+        "amphur_code":  5507,
+        "amphur_th":  "เวียงสา",
+        "amphur_en":  "Wiang sa",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  590,
+        "amphur_code":  5508,
+        "amphur_th":  "ทุ่งช้าง",
+        "amphur_en":  "Thung chang",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  591,
+        "amphur_code":  5509,
+        "amphur_th":  "เชียงกลาง",
+        "amphur_en":  "Cheang klang",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  592,
+        "amphur_code":  5510,
+        "amphur_th":  "นาหมื่น",
+        "amphur_en":  "Na mun",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  593,
+        "amphur_code":  5511,
+        "amphur_th":  "สันติสุข",
+        "amphur_en":  "Suntisuk",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  594,
+        "amphur_code":  5512,
+        "amphur_th":  "บ่อเกลือ",
+        "amphur_en":  "Bo kluai",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  595,
+        "amphur_code":  5513,
+        "amphur_th":  "สองแคว",
+        "amphur_en":  "Song kwar",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  596,
+        "amphur_code":  5514,
+        "amphur_th":  "ภูเพียง",
+        "amphur_en":  "Phu pieng",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    },
+    {
+        "amphur_id":  597,
+        "amphur_code":  5515,
+        "amphur_th":  "เฉลิมพระเกียรติ",
+        "amphur_en":  "Chaloem phrakiat ",
+        "province_id":  44,
+        "geo_id":  1,
+        "shot":  "อ."
+    }
+]

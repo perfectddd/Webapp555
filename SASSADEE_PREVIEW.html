@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบงานสัสดีอิเล็กทรอนิกส์ (SASSADEE NAN) - มทบ.38</title>
+  <!-- Google Fonts: Sarabun -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Sarabun', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- React & Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    @media print {
+      body { background: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
+      header, footer, nav, button, .print-hidden { display: none !important; }
+      .print-area { box-shadow: none !important; border: 2px solid #000 !important; padding: 20mm !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    const AMPHURS = [
+      { amphur_code: 5501, amphur_th: "เมืองน่าน" },
+      { amphur_code: 5502, amphur_th: "แม่จริม" },
+      { amphur_code: 5503, amphur_th: "บ้านหลวง" },
+      { amphur_code: 5504, amphur_th: "นาน้อย" },
+      { amphur_code: 5505, amphur_th: "ปัว" },
+      { amphur_code: 5506, amphur_th: "ท่าวังผา" },
+      { amphur_code: 5507, amphur_th: "เวียงสา" },
+      { amphur_code: 5508, amphur_th: "ทุ่งช้าง" },
+      { amphur_code: 5509, amphur_th: "เชียงกลาง" },
+      { amphur_code: 5510, amphur_th: "นาหมื่น" },
+      { amphur_code: 5511, amphur_th: "สันติสุข" },
+      { amphur_code: 5512, amphur_th: "บ่อเกลือ" },
+      { amphur_code: 5513, amphur_th: "สองแคว" },
+      { amphur_code: 5514, amphur_th: "ภูเพียง" },
+      { amphur_code: 5515, amphur_th: "เฉลิมพระเกียรติ" }
+    ];
+
+    const SAMPLE_ROADS = [
+      'ถนนสุริยพงษ์', 'ถนนอนันตวรฤทธิเดช', 'ถนนมหายศ', 'ถนนผากอง', 'ถนนสุมนเทวราช',
+      'ถนนเจษฎาบดินทร์', 'ถนนเปรมประชาราษฎร์', 'ถนนรอบเมือง', 'ถนนน่าน-พะเยา',
+      'ถนนน่าน-ท่าวังผา', 'ถนนน่าน-แม่จริม', 'ถนนน่าน-เวียงสา', 'ถนนน่าน-บ้านหลวง'
+    ];
+
+    const SAMPLE_SOIS = [
+      'ซอย 1', 'ซอย 2', 'ซอย 3', 'ซอย 4', 'ซอย 5', 'ซอยวัดช้างค้ำ', 'ซอยภูมินทร์',
+      'ซอยมณเฑียร', 'ซอยบ้านดอน', 'ซอยพญาภู', 'ซอยดอนแก้ว', 'ซอยสวนตาล'
+    ];
+
+    const THAI_MONTHS = [
+      'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+
+    function isValidThaiID(id) {
+      if (!id) return false;
+      const clean = id.toString().replace(/[-\s]/g, '');
+      if (clean.length !== 13 || !/^\d{13}$/.test(clean)) return false;
+      let sum = 0;
+      for (let i = 0; i < 12; i++) {
+        sum += parseInt(clean.charAt(i), 10) * (13 - i);
+      }
+      const check = (11 - (sum % 11)) % 10;
+      return check === parseInt(clean.charAt(12), 10);
+    }
+
+    function formatThaiID(id) {
+      if (!id) return '';
+      const clean = id.toString().replace(/\D/g, '');
+      if (clean.length !== 13) return id;
+      return `${clean.slice(0, 1)}-${clean.slice(1, 5)}-${clean.slice(5, 10)}-${clean.slice(10, 12)}-${clean.slice(12, 13)}`;
+    }
+
+    const INITIAL_RECRUITS = [
+      { id: "55030147001", citizenId: "1559900470447", sd1Number: "1", sd9BookNumber: "1", sd9DocNumber: "1", firstName: "กรวิชญ์", lastName: "โคตรหาซาว", birthDate: 12, birthMonth: "กุมภาพันธ์", birthYear: 2547, houseNumber: "116", moo: 3, subDistrict: "บ้านฟ้า", district: "บ้านหลวง", province: "น่าน", fatherName: "บรรจง", fatherLastName: "โคตรหาซาว", motherName: "จิรัชญา", motherLastName: "โคตรหาซาว", mark: "ข้อศอกซ้าย", education: "มัธยมศึกษาปีที่ ๔", occupation: "รับจ้าง", religion: "พุทธ", status: "ลงบัญชีแล้ว (สด.9)", regDate: 11, regMonth: "มกราคม", regYear: 2564 },
+      { id: "55030247002", citizenId: "1550300079307", sd1Number: "2", sd9BookNumber: "1", sd9DocNumber: "2", firstName: "ธีวานนท์", lastName: "อายุยืน", birthDate: 2, birthMonth: "กันยายน", birthYear: 2547, houseNumber: "75", moo: 2, subDistrict: "สวด", district: "บ้านหลวง", province: "น่าน", fatherName: "พยอม", fatherLastName: "อายุยืน", motherName: "จันทร์ดี", motherLastName: "อายุยืน", mark: "ปกติ", education: "มัธยมศึกษาปีที่ ๖", occupation: "รับจ้าง", religion: "พุทธ", status: "ลงบัญชีแล้ว (สด.9)", regDate: 11, regMonth: "มกราคม", regYear: 2564 },
+      { id: "55030347003", citizenId: "1550300079498", sd1Number: "3", sd9BookNumber: "1", sd9DocNumber: "3", firstName: "พัสกร", lastName: "มะโนวรณ์", birthDate: 18, birthMonth: "พฤศจิกายน", birthYear: 2547, houseNumber: "118", moo: 2, subDistrict: "สวด", district: "บ้านหลวง", province: "น่าน", fatherName: "ชาญณรงค์", fatherLastName: "มะโนวรณ์", motherName: "ศิริพร", motherLastName: "มะโนวรณ์", mark: "ไฝที่คิ้วซ้าย", education: "มัธยมศึกษาปีที่ ๖", occupation: "รับจ้าง", religion: "พุทธ", status: "ลงบัญชีแล้ว (สด.9)", regDate: 11, regMonth: "มกราคม", regYear: 2564 },
+      { id: "55010147004", citizenId: "1550100123456", sd1Number: "4", sd9BookNumber: "1", sd9DocNumber: "4", firstName: "นพดล", lastName: "ชัยชนะ", birthDate: 5, birthMonth: "พฤษภาคม", birthYear: 2547, houseNumber: "88/1", moo: 1, subDistrict: "ในเวียง", district: "เมืองน่าน", province: "น่าน", fatherName: "สมชาย", fatherLastName: "ชัยชนะ", motherName: "นิตยา", motherLastName: "ชัยชนะ", mark: "ปกติ", education: "ปริญญาตรี", occupation: "ค้าขาย", religion: "พุทธ", status: "ลงบัญชีแล้ว (สด.9)", regDate: 15, regMonth: "กุมภาพันธ์", regYear: 2564 },
+      { id: "55050147005", citizenId: "1550500987654", sd1Number: "5", sd9BookNumber: "1", sd9DocNumber: "5", firstName: "ภูวนัย", lastName: "ศรีสุข", birthDate: 20, birthMonth: "สิงหาคม", birthYear: 2547, houseNumber: "14", moo: 4, subDistrict: "วรนคร", district: "ปัว", province: "น่าน", fatherName: "อำนาจ", fatherLastName: "ศรีสุข", motherName: "ปราณี", motherLastName: "ศรีสุข", mark: "แผลเป็นเข่าขวา", education: "มัธยมศึกษาปีที่ ๖", occupation: "เกษตรกรรม", religion: "พุทธ", status: "ลงบัญชีแล้ว (สด.9)", regDate: 20, regMonth: "มกราคม", regYear: 2564 }
+    ];
+
+    function App() {
+      const [activeTab, setActiveTab] = useState('dashboard');
+      const [recruits, setRecruits] = useState(INITIAL_RECRUITS);
+      const [selectedRecruitForPrint, setSelectedRecruitForPrint] = useState(null);
+      const [selectedRecruitForDetail, setSelectedRecruitForDetail] = useState(null);
+
+      const handleAddRecruit = (newR) => {
+        setRecruits(prev => [newR, ...prev]);
+        setSelectedRecruitForPrint(newR);
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          {/* Header */}
+          <header className="bg-slate-900 text-white shadow-lg border-b border-slate-700 sticky top-0 z-40 print-hidden">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-20">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-2xl shadow-md border-2 border-emerald-400">
+                    🎖️
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h1 className="text-lg sm:text-xl font-bold">
+                        ระบบงานสัสดีอิเล็กทรอนิกส์ (SASSADEE NAN)
+                      </h1>
+                      <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-0.5 rounded-full font-medium border border-emerald-500/30">
+                        มทบ.38 น่าน
+                      </span>
+                      <span className="bg-blue-500/20 text-blue-300 text-xs px-2 py-0.5 rounded-full font-medium border border-blue-400/30">
+                        MySQL 8.4 Ready
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      ระบบลงบัญชีทหารกองเกิน (สด.๙ / สด.๑) จังหวัดน่าน ๑๕ อำเภอ
+                    </p>
+                  </div>
+                </div>
+
+                <nav className="flex space-x-1 sm:space-x-2">
+                  {[
+                    { id: 'dashboard', label: '📊 ภาพรวม' },
+                    { id: 'register', label: '📝 ลงบัญชี สด.๙' },
+                    { id: 'list', label: `👥 ทะเบียน (${recruits.length})` }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        activeTab === tab.id
+                          ? 'bg-emerald-600 text-white shadow-md'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Body */}
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {activeTab === 'dashboard' && (
+              <DashboardView
+                recruits={recruits}
+                amphurs={AMPHURS}
+                onRegisterClick={() => setActiveTab('register')}
+                onViewRecruit={(r) => setSelectedRecruitForDetail(r)}
+              />
+            )}
+            {activeTab === 'register' && (
+              <RegistrationForm
+                amphurs={AMPHURS}
+                onSaveSuccess={handleAddRecruit}
+                onCancel={() => setActiveTab('list')}
+              />
+            )}
+            {activeTab === 'list' && (
+              <RecruitList
+                recruits={recruits}
+                amphurs={AMPHURS}
+                onPrintSD9={(r) => setSelectedRecruitForPrint(r)}
+                onSelectRecruit={(r) => setSelectedRecruitForDetail(r)}
+                onRegisterNew={() => setActiveTab('register')}
+              />
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 print-hidden">
+            ระบบงานสัสดีอิเล็กทรอนิกส์ (SASSADEE NAN) — กองการสัสดี มณฑลทหารบกที่ 38 จังหวัดน่าน | สถาปัตยกรรม MySQL 8.4 & Linux Debian
+          </footer>
+
+          {/* Print SD9 Modal */}
+          {selectedRecruitForPrint && (
+            <PrintModal
+              recruit={selectedRecruitForPrint}
+              onClose={() => setSelectedRecruitForPrint(null)}
+            />
+          )}
+
+          {/* Detail Modal */}
+          {selectedRecruitForDetail && (
+            <DetailModal
+              recruit={selectedRecruitForDetail}
+              onClose={() => setSelectedRecruitForDetail(null)}
+              onPrintSD9={(r) => {
+                setSelectedRecruitForDetail(null);
+                setSelectedRecruitForPrint(r);
+              }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // Dashboard Component
+    function DashboardView({ recruits, amphurs, onRegisterClick, onViewRecruit }) {
+      const total = recruits.length;
+      const districtCounts = {};
+      amphurs.forEach(a => { districtCounts[a.amphur_th] = 0; });
+      recruits.forEach(r => {
+        const d = r.district || 'เมืองน่าน';
+        districtCounts[d] = (districtCounts[d] || 0) + 1;
+      });
+
+      return (
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 rounded-2xl p-6 text-white shadow-xl border border-slate-700">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-semibold mb-2 border border-emerald-400/30">
+                  สถาปัตยกรรมปรับปรุงใหม่ (Phase 1-3)
+                </span>
+                <h2 className="text-2xl font-bold">
+                  ระบบจัดการทะเบียนและลงบัญชีทหารกองเกิน จังหวัดน่าน (15 อำเภอ)
+                </h2>
+                <p className="text-sm text-slate-300 mt-1">
+                  ปรับจูน MySQL 8.4 (InnoDB / utf8mb4_thai_520_w2) + ล้าง Error Log + ตารางสรุป Dashboard
+                </p>
+              </div>
+              <button
+                onClick={onRegisterClick}
+                className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl shadow-lg transition-all flex items-center space-x-2"
+              >
+                <span>➕</span>
+                <span>ลงบัญชี สด.9 รายใหม่</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+              <div className="text-xs font-semibold text-slate-500 uppercase">ยอดลงบัญชีทหารกองเกิน</div>
+              <div className="text-3xl font-extrabold text-slate-900 mt-2">{total} <span className="text-sm font-normal text-slate-500">นาย</span></div>
+              <div className="text-xs text-emerald-600 font-medium mt-1">✓ พร้อมออกใบสำคัญ สด.9</div>
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+              <div className="text-xs font-semibold text-slate-500 uppercase">พื้นที่รับผิดชอบ</div>
+              <div className="text-3xl font-extrabold text-slate-900 mt-2">15 <span className="text-sm font-normal text-slate-500">อำเภอ</span></div>
+              <div className="text-xs text-slate-500 mt-1">มณฑลทหารบกที่ 38 น่าน</div>
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+              <div className="text-xs font-semibold text-slate-500 uppercase">ระบบฐานข้อมูลหลัก</div>
+              <div className="text-2xl font-bold text-blue-600 mt-2 flex items-center space-x-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <span>MySQL 8.4 LTS</span>
+              </div>
+              <div className="text-xs text-slate-500 mt-1">Buffer Pool 1G + Keyset Index</div>
+            </div>
+            <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+              <div className="text-xs font-semibold text-slate-500 uppercase">การเชื่อมโยง Access ODBC</div>
+              <div className="text-2xl font-bold text-emerald-700 mt-2">No Conflict</div>
+              <div className="text-xs text-slate-500 mt-1">TIMESTAMP + Primary Key</div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-4">
+              📍 ยอดการลงบัญชีทหารกองเกิน แยกตาม 15 อำเภอ (จังหวัดน่าน)
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              {amphurs.map(a => {
+                const count = districtCounts[a.amphur_th] || 0;
+                return (
+                  <div key={a.amphur_code} className="p-3 rounded-lg border border-slate-100 bg-slate-50 hover:bg-emerald-50/40">
+                    <div className="flex justify-between text-xs font-bold text-slate-800">
+                      <span>อ.{a.amphur_th}</span>
+                      <span className="text-slate-400 font-mono">{a.amphur_code}</span>
+                    </div>
+                    <div className="text-xl font-extrabold text-emerald-700 mt-1">{count} นาย</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Registration Form Component with Road/Soi Autocomplete
+    function RegistrationForm({ amphurs, onSaveSuccess, onCancel }) {
+      const [formData, setFormData] = useState({
+        citizenId: '',
+        title: 'นาย',
+        firstName: '',
+        lastName: '',
+        birthDate: '1',
+        birthMonth: 'มกราคม',
+        birthYear: '2552',
+        religion: 'พุทธ',
+        occupation: 'รับจ้าง',
+        education: 'มัธยมศึกษาปีที่ ๖',
+        mark: 'ปกติ',
+        phone: '',
+        province: 'น่าน',
+        district: 'เมืองน่าน',
+        subDistrict: '',
+        moo: '1',
+        houseNumber: '',
+        road: '',
+        soi: '',
+        fatherName: '',
+        fatherLastName: '',
+        motherName: '',
+        motherLastName: '',
+        regDate: new Date().getDate().toString(),
+        regMonth: THAI_MONTHS[new Date().getMonth()],
+        regYear: (new Date().getFullYear() + 543).toString(),
+        sd9BookNumber: '1',
+        sd9DocNumber: '',
+        sd1Number: ''
+      });
+
+      const [idValid, setIdValid] = useState({ checked: false, valid: false });
+      const [roadSuggestions, setRoadSuggestions] = useState([]);
+      const [showRoadSuggest, setShowRoadSuggest] = useState(false);
+
+      const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        if (name === 'citizenId') {
+          const raw = value.replace(/\D/g, '');
+          if (raw.length === 13) {
+            setIdValid({ checked: true, valid: isValidThaiID(raw) });
+          } else {
+            setIdValid({ checked: false, valid: false });
+          }
+        }
+
+        if (name === 'road') {
+          if (value.trim()) {
+            setRoadSuggestions(SAMPLE_ROADS.filter(r => r.toLowerCase().includes(value.trim().toLowerCase())));
+            setShowRoadSuggest(true);
+          } else {
+            setShowRoadSuggest(false);
+          }
+        }
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        const rawId = formData.citizenId.replace(/\D/g, '');
+        if (rawId.length !== 13) {
+          alert('กรุณาระบุเลขประจำตัวประชาชนให้ครบ 13 หลัก');
+          return;
+        }
+
+        const newRecruit = {
+          ...formData,
+          citizenId: rawId,
+          birthDate: parseInt(formData.birthDate),
+          birthYear: parseInt(formData.birthYear),
+          sd9DocNumber: formData.sd9DocNumber || Math.floor(100 + Math.random() * 900).toString(),
+          sd1Number: formData.sd1Number || Math.floor(100 + Math.random() * 900).toString(),
+          id: `550101${formData.birthYear.slice(-2)}${Math.floor(100 + Math.random() * 900)}`,
+          status: 'ลงบัญชีแล้ว (สด.9)'
+        };
+
+        onSaveSuccess(newRecruit);
+      };
+
+      return (
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden max-w-4xl mx-auto">
+          <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+            <div>
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">แบบ สด.๙</span>
+              <h2 className="text-xl font-bold text-slate-900 mt-1">แบบฟอร์มการลงบัญชีทหารกองเกิน</h2>
+              <p className="text-xs text-slate-500">สำหรับออกใบสำคัญ สด.๙ และลงในสมุดบัญชี สด.๑</p>
+            </div>
+            <button type="button" onClick={onCancel} className="text-xs text-slate-500 hover:text-slate-700">
+              ← กลับ
+            </button>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Section 1 */}
+            <div>
+              <h3 className="font-bold text-emerald-800 text-sm mb-3">1. ข้อมูลประจำตัว</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">เลขประจำตัวประชาชน 13 หลัก *</label>
+                  <input
+                    type="text"
+                    name="citizenId"
+                    value={formData.citizenId}
+                    onChange={handleChange}
+                    maxLength="17"
+                    placeholder="เช่น 1-5501-00123-45-6"
+                    required
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg font-mono focus:ring-2 focus:ring-emerald-400"
+                  />
+                  {idValid.checked && (
+                    <span className={`text-xs mt-1 block font-semibold ${idValid.valid ? 'text-emerald-600' : 'text-red-500'}`}>
+                      {idValid.valid ? '✓ รหัสประจำตัวประชาชนถูกต้อง (Modulo 11)' : '✗ Checksum เลขบัตรประชาชนไม่ถูกต้อง'}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">คำนำหน้า</label>
+                  <select name="title" value={formData.title} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg">
+                    <option value="นาย">นาย</option>
+                    <option value="สามเณร">สามเณร</option>
+                    <option value="พระภิกษุ">พระภิกษุ</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ชื่อ *</label>
+                  <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">นามสกุล *</label>
+                  <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">เบอร์โทรศัพท์</label>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="08x-xxx-xxxx" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+              </div>
+
+              {/* Birth Date */}
+              <div className="grid grid-cols-3 gap-3 mt-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">เกิดวันที่</label>
+                  <select name="birthDate" value={formData.birthDate} onChange={handleChange} className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded bg-white">
+                    {Array.from({length: 31}, (_, i) => i + 1).map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">เดือนเกิด</label>
+                  <select name="birthMonth" value={formData.birthMonth} onChange={handleChange} className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded bg-white">
+                    {THAI_MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ปีเกิด (พ.ศ.)</label>
+                  <input type="number" name="birthYear" value={formData.birthYear} onChange={handleChange} className="w-full px-2 py-1.5 text-sm border border-slate-300 rounded bg-white" />
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2 */}
+            <div>
+              <h3 className="font-bold text-emerald-800 text-sm mb-3">2. ภูมิลำเนาทหาร (จังหวัดน่าน)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">อำเภอ *</label>
+                  <select name="district" value={formData.district} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white font-medium">
+                    {amphurs.map(a => <option key={a.amphur_code} value={a.amphur_th}>อ.{a.amphur_th}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ตำบล *</label>
+                  <input type="text" name="subDistrict" value={formData.subDistrict} onChange={handleChange} placeholder="เช่น ในเวียง" required className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">หมู่ที่</label>
+                  <input type="number" name="moo" value={formData.moo} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">บ้านเลขที่</label>
+                  <input type="text" name="houseNumber" value={formData.houseNumber} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                {/* Road Autocomplete */}
+                <div className="relative md:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ถนน (พิมพ์เพื่อค้นหาแบบ Autocomplete)</label>
+                  <input
+                    type="text"
+                    name="road"
+                    value={formData.road}
+                    onChange={handleChange}
+                    onFocus={() => setShowRoadSuggest(true)}
+                    onBlur={() => setTimeout(() => setShowRoadSuggest(false), 200)}
+                    placeholder="เช่น ถนนสุริยพงษ์"
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg"
+                  />
+                  {showRoadSuggest && roadSuggestions.length > 0 && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-36 overflow-y-auto text-xs">
+                      {roadSuggestions.map(road => (
+                        <div
+                          key={road}
+                          onMouseDown={() => {
+                            setFormData(p => ({ ...p, road }));
+                            setShowRoadSuggest(false);
+                          }}
+                          className="px-3 py-2 hover:bg-emerald-50 hover:text-emerald-800 cursor-pointer"
+                        >
+                          {road}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ตรอก / ซอย</label>
+                  <input type="text" name="soi" value={formData.soi} onChange={handleChange} placeholder="เช่น ซอย 2" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+              </div>
+            </div>
+
+            {/* Section 3 */}
+            <div>
+              <h3 className="font-bold text-emerald-800 text-sm mb-3">3. ข้อมูลครอบครัวและคุณลักษณะ</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ชื่อบิดา</label>
+                  <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">นามสกุลบิดา</label>
+                  <input type="text" name="fatherLastName" value={formData.fatherLastName} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ชื่อมารดา</label>
+                  <input type="text" name="motherName" value={formData.motherName} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">นามสกุลมารดา</label>
+                  <input type="text" name="motherLastName" value={formData.motherLastName} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">ตำหนิสำคัญ</label>
+                  <input type="text" name="mark" value={formData.mark} onChange={handleChange} placeholder="เช่น ไฝแก้มขวา / ปกติ" className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">การศึกษา / ความรู้</label>
+                  <select name="education" value={formData.education} onChange={handleChange} className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white">
+                    <option value="มัธยมศึกษาปีที่ ๖">มัธยมศึกษาปีที่ ๖</option>
+                    <option value="มัธยมศึกษาปีที่ ๓">มัธยมศึกษาปีที่ ๓</option>
+                    <option value="ปวช.">ปวช.</option>
+                    <option value="ปวส.">ปวส.</option>
+                    <option value="ปริญญาตรี">ปริญญาตรี</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end space-x-3">
+            <button type="button" onClick={onCancel} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm">
+              ยกเลิก
+            </button>
+            <button type="submit" className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-sm shadow">
+              💾 บันทึกและพิมพ์ สด.๙
+            </button>
+          </div>
+        </form>
+      );
+    }
+
+    // Recruit List Component with Debounce (300ms)
+    function RecruitList({ recruits, amphurs, onPrintSD9, onSelectRecruit, onRegisterNew }) {
+      const [inputSearch, setInputSearch] = useState('');
+      const [debouncedSearch, setDebouncedSearch] = useState('');
+      const [district, setDistrict] = useState('');
+
+      useEffect(() => {
+        const handler = setTimeout(() => {
+          setDebouncedSearch(inputSearch);
+        }, 300);
+        return () => clearTimeout(handler);
+      }, [inputSearch]);
+
+      const filtered = recruits.filter(r => {
+        if (district && r.district !== district) return false;
+        if (debouncedSearch) {
+          const s = debouncedSearch.toLowerCase();
+          const name = `${r.firstName} ${r.lastName}`.toLowerCase();
+          const cid = (r.citizenId || '').toString();
+          if (!name.includes(s) && !cid.includes(s)) return false;
+        }
+        return true;
+      });
+
+      return (
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-3 justify-between items-center">
+            <div className="flex gap-2 w-full sm:w-auto flex-1">
+              <input
+                type="text"
+                value={inputSearch}
+                onChange={e => setInputSearch(e.target.value)}
+                placeholder="🔍 ค้นหาด้วยชื่อ, นามสกุล หรือเลข ปชช. 13 หลัก (Debounced 300ms)..."
+                className="w-full sm:max-w-md px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-400"
+              />
+              <select
+                value={district}
+                onChange={e => setDistrict(e.target.value)}
+                className="px-3 py-2 text-sm border border-slate-300 rounded-lg bg-white"
+              >
+                <option value="">ทุกอำเภอ</option>
+                {amphurs.map(a => <option key={a.amphur_code} value={a.amphur_th}>อ.{a.amphur_th}</option>)}
+              </select>
+            </div>
+            <button
+              onClick={onRegisterNew}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold shadow flex items-center space-x-1 whitespace-nowrap"
+            >
+              <span>➕</span><span>ลงบัญชีใหม่</span>
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="bg-slate-50 text-slate-700 text-xs uppercase font-semibold">
+                <tr>
+                  <th className="px-4 py-3 text-left">เลข ปชช. 13 หลัก</th>
+                  <th className="px-4 py-3 text-left">ชื่อ - นามสกุล</th>
+                  <th className="px-4 py-3 text-left">วันเดือนปีเกิด</th>
+                  <th className="px-4 py-3 text-left">ภูมิลำเนาทหาร</th>
+                  <th className="px-4 py-3 text-left">ใบสำคัญ สด.๙</th>
+                  <th className="px-4 py-3 text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.map(r => (
+                  <tr key={r.id || r.citizenId} className="hover:bg-slate-50">
+                    <td className="px-4 py-3 font-mono text-xs text-slate-800">{formatThaiID(r.citizenId)}</td>
+                    <td className="px-4 py-3 font-bold text-slate-900">{r.firstName} {r.lastName}</td>
+                    <td className="px-4 py-3 text-xs">{r.birthDate} {r.birthMonth} {r.birthYear}</td>
+                    <td className="px-4 py-3 text-xs">อ.{r.district} ต.{r.subDistrict || '-'}</td>
+                    <td className="px-4 py-3 text-xs"><span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-medium">เล่ม {r.sd9BookNumber || '1'} เลข {r.sd9DocNumber}</span></td>
+                    <td className="px-4 py-3 text-center space-x-1">
+                      <button onClick={() => onSelectRecruit(r)} className="px-2.5 py-1 text-xs bg-slate-100 hover:bg-slate-200 rounded font-medium">👁️ ดู</button>
+                      <button onClick={() => onPrintSD9(r)} className="px-2.5 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded font-medium">🖨️ พิมพ์ สด.๙</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+
+    // Official Print Modal (แบบ สด.๙)
+    function PrintModal({ recruit, onClose }) {
+      return (
+        <div className="fixed inset-0 bg-slate-900/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-100 rounded-2xl max-w-4xl w-full p-6 shadow-2xl my-8">
+            <div className="print-hidden flex justify-between items-center pb-4 mb-4 border-b border-slate-300">
+              <h3 className="font-bold text-slate-800">ตัวอย่างแบบพิมพ์ใบสำคัญ (แบบ สด.๙)</h3>
+              <div className="flex space-x-2">
+                <button onClick={() => window.print()} className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-sm font-bold shadow">
+                  🖨️ สั่งพิมพ์ (A4)
+                </button>
+                <button onClick={onClose} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm">
+                  ปิด
+                </button>
+              </div>
+            </div>
+
+            <div className="print-area bg-white p-10 mx-auto rounded shadow border-2 border-slate-900 text-slate-900 max-w-[210mm] leading-relaxed">
+              <div className="flex justify-between text-xs mb-2">
+                <span>สมุด สด.๑ เล่มที่ <strong>{recruit.sd9BookNumber || '๑'}</strong> เลขที่ <strong>{recruit.sd1Number || '๑'}</strong></span>
+                <span className="font-bold text-sm">แบบ สด.๙</span>
+              </div>
+              <div className="text-center my-3 text-4xl">🦅</div>
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold">ใบสำคัญ</h2>
+                <p className="text-sm font-medium">(หนังสือสำคัญแสดงการลงบัญชีทหารกองเกิน)</p>
+              </div>
+              <div className="text-sm space-y-4 text-justify">
+                <p className="indent-8 leading-loose">
+                  ใบสำคัญนี้ออกให้แก่ <strong>{recruit.firstName} {recruit.lastName}</strong> เลขประจำตัวประชาชน <strong>{formatThaiID(recruit.citizenId)}</strong> เกิดวันที่ <strong>{recruit.birthDate}</strong> เดือน <strong>{recruit.birthMonth}</strong> พ.ศ. <strong>{recruit.birthYear}</strong> สัญชาติ <strong>ไทย</strong> ศาสนา <strong>{recruit.religion || 'พุทธ'}</strong> อาชีพ <strong>{recruit.occupation || 'รับจ้าง'}</strong>
+                </p>
+                <p className="indent-8 leading-loose">
+                  บิดาชื่อ <strong>{recruit.fatherName || '-'} {recruit.fatherLastName || ''}</strong> สัญชาติ <strong>ไทย</strong> มารดาชื่อ <strong>{recruit.motherName || '-'} {recruit.motherLastName || ''}</strong> สัญชาติ <strong>ไทย</strong> ภูมิลำเนาทหารอยู่บ้านเลขที่ <strong>{recruit.houseNumber || '-'}</strong> หมู่ที่ <strong>{recruit.moo || '๑'}</strong> ตำบล <strong>{recruit.subDistrict || '-'}</strong> อำเภอ <strong>{recruit.district || 'เมืองน่าน'}</strong> จังหวัด <strong>{recruit.province || 'น่าน'}</strong>
+                </p>
+                <p className="indent-8 leading-loose">
+                  ตำหนิสำคัญ <strong>{recruit.mark || 'ปกติ'}</strong> ได้แสดงตนลงบัญชีทหารกองเกินไว้ที่อำเภอ <strong>{recruit.district || 'เมืองน่าน'}</strong> จังหวัด <strong>{recruit.province || 'น่าน'}</strong> เมื่อวันที่ <strong>{recruit.regDate || '๑'}</strong> เดือน <strong>{recruit.regMonth || 'มกราคม'}</strong> พ.ศ. <strong>{recruit.regYear || '๒๕๖๙'}</strong> แล้ว
+                </p>
+              </div>
+              <div className="mt-12 flex justify-end">
+                <div className="w-64 text-center text-xs space-y-2">
+                  <div>ออกให้ ณ วันที่ <strong>{recruit.regDate || '๑'}</strong> เดือน <strong>{recruit.regMonth || 'มกราคม'}</strong> พ.ศ. <strong>{recruit.regYear || '๒๕๖๙'}</strong></div>
+                  <div className="h-10"></div>
+                  <div className="border-b border-dotted border-slate-700 w-44 mx-auto"></div>
+                  <div className="font-bold">สัสดีอำเภอ{recruit.district || 'เมืองน่าน'}</div>
+                </div>
+              </div>
+              <div className="mt-8 pt-4 border-t-2 border-slate-900 text-[11px] bg-slate-50 p-3 rounded">
+                <strong>คำเตือน:</strong> เมื่อมีอายุครบ ๒๐ ปีบริบูรณ์ ต้องไปรับหมายเรียก (สด.๓๕) ณ ที่ว่าการอำเภอภูมิลำเนาทหาร เพื่อเข้ารับการตรวจเลือก (สด.๔๓) เมื่ออายุ ๒๑ ปี
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Detail Modal
+    function DetailModal({ recruit, onClose, onPrintSD9 }) {
+      return (
+        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+            <div className="flex justify-between items-center pb-3 border-b">
+              <h3 className="font-bold text-lg text-slate-900">{recruit.firstName} {recruit.lastName}</h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+            </div>
+            <div className="py-4 space-y-2 text-xs">
+              <div className="flex justify-between py-1 border-b"><span>เลขบัตร ปชช.:</span><span className="font-mono font-bold">{formatThaiID(recruit.citizenId)}</span></div>
+              <div className="flex justify-between py-1 border-b"><span>วันเกิด:</span><span>{recruit.birthDate} {recruit.birthMonth} {recruit.birthYear}</span></div>
+              <div className="flex justify-between py-1 border-b"><span>ภูมิลำเนา:</span><span>อ.{recruit.district} ต.{recruit.subDistrict} ม.{recruit.moo}</span></div>
+              <div className="flex justify-between py-1 border-b"><span>บิดา / มารดา:</span><span>{recruit.fatherName} / {recruit.motherName}</span></div>
+              <div className="flex justify-between py-1 border-b"><span>ใบสำคัญ สด.๙:</span><span>เล่ม {recruit.sd9BookNumber} เลขที่ {recruit.sd9DocNumber}</span></div>
+            </div>
+            <div className="pt-3 flex justify-between">
+              <button onClick={onClose} className="px-4 py-2 border rounded-lg text-xs">ปิด</button>
+              <button onClick={() => onPrintSD9(recruit)} className="px-4 py-2 bg-emerald-700 text-white rounded-lg text-xs font-bold">🖨️ พิมพ์ สด.๙</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

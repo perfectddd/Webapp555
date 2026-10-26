@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production Build
+dist/
+build/
+
+# Microsoft Access & Large Binary Files (Exceeds GitHub 100MB limit)
+*.accdb
+*.laccdb
+*.mdb
+*.ldb
+
+# Local Backups & Temporary files
+backups/
+*.log
+mysql-data/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini

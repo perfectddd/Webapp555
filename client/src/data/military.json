@@ -1,0 +1,74 @@
+﻿[
+    {
+        "ID":  1,
+        "military":  "ดำ",
+        "military2":  null,
+        "military3":  null,
+        "military4":  null,
+        "military5":  null
+    },
+    {
+        "ID":  2,
+        "military":  "ทบ.1",
+        "military2":  "ทหารบก",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "พฤษภาคม",
+        "military5":  null
+    },
+    {
+        "ID":  3,
+        "military":  "ทบ.2",
+        "military2":  "ทหารบก",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "พฤศจิกายน",
+        "military5":  null
+    },
+    {
+        "ID":  4,
+        "military":  "ทอ.1",
+        "military2":  "ทหารอากาศ",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "พฤษภาคม",
+        "military5":  null
+    },
+    {
+        "ID":  5,
+        "military":  "ทอ.2",
+        "military2":  "ทหารอากาศ",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "พฤศจิกายน",
+        "military5":  null
+    },
+    {
+        "ID":  6,
+        "military":  "ทร.1",
+        "military2":  "ทหารเรือ",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "พฤษภาคม",
+        "military5":  null
+    },
+    {
+        "ID":  7,
+        "military":  "ทร.2",
+        "military2":  "ทหารเรือ",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "สิงหาคม",
+        "military5":  null
+    },
+    {
+        "ID":  8,
+        "military":  "ทร.3",
+        "military2":  "ทหารเรือ",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "พฤศจิกายน",
+        "military5":  null
+    },
+    {
+        "ID":  9,
+        "military":  "ทร.4",
+        "military2":  "ทหารเรือ",
+        "military3":  "เข้ากองประจำการ",
+        "military4":  "กุมภาพันธ์",
+        "military5":  null
+    }
+]
