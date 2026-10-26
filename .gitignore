@@ -19,6 +19,7 @@ build/
 backups/
 *.log
 mysql-data/
+server/data/recruits_db.json
 
 # Environment Variables & Secrets
 .env

@@ -290,6 +290,30 @@ const server = http.createServer(async (req, res) => {
         recruits.unshift(newRecruit);
         saveRecruits();
 
+        if (db.isMySQLConnected() && db.getPool()) {
+          try {
+            await db.getPool().execute(
+              `INSERT INTO tb_recuit (
+                recruit_code, id_card, first_name, last_name, birth_date, birth_month, birth_year,
+                reg_date, reg_month, reg_year, house_number, moo, sub_district, amphur_name,
+                province_name, father_name, father_last_name, mother_name, mother_last_name,
+                mark, education, occupation, religion, phone, status, sd1_number, sd9_book_number, sd9_doc_number
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                newRecruit.id, newRecruit.citizenId, newRecruit.firstName, newRecruit.lastName,
+                newRecruit.birthDate, newRecruit.birthMonth, newRecruit.birthYear, newRecruit.regDate,
+                newRecruit.regMonth, newRecruit.regYear, newRecruit.houseNumber, newRecruit.moo,
+                newRecruit.subDistrict, newRecruit.district, newRecruit.province, newRecruit.fatherName,
+                newRecruit.fatherLastName, newRecruit.motherName, newRecruit.motherLastName,
+                newRecruit.mark, newRecruit.education, newRecruit.occupation, newRecruit.religion,
+                newRecruit.phone, newRecruit.status, newRecruit.sd1Number, newRecruit.sd9BookNumber, newRecruit.sd9DocNumber
+              ]
+            );
+          } catch (dbErr) {
+            console.error('[SASSADEE DB] Failed to persist recruit to MySQL tb_recuit:', dbErr.message);
+          }
+        }
+
         db.logAuditAsync({
           action: 'REGISTER_SD9',
           recordId: newRecruit.id,

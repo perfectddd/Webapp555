@@ -19,7 +19,7 @@
    * ค้นหาด่วนด้วยชื่อ นามสกุล หรือเลข 13 หลัก พร้อมระบบหน่วงเวลา **Debounce 300ms**
    * กรองแยกตามอำเภอและปีเกิด พร้อมการแบ่งหน้า (Pagination)
 4. **สถาปัตยกรรมฐานข้อมูล MySQL 8.4 LTS:**
-   * Engine: `InnoDB` | Charset: `utf8mb4` | Collation: `utf8mb4_thai_520_w2`
+   * Engine: `InnoDB` | Charset: `utf8mb4` | Collation: `utf8mb4_0900_ai_ci` (Unicode 9.0 Thai sorting standard)
    * ตาราง `tb_recuit` พร้อม `UNIQUE KEY ux_idcard` และ Composite Index `ix_year_area`
    * คอลัมน์ `updated_at TIMESTAMP` ป้องกันปัญหา Write Conflict ใน Access ODBC
    * ตาราง `tb_sd1_sequence` ป้องกันการออกเลขซ้ำด้วย Row-level Lock (`SELECT ... FOR UPDATE`)

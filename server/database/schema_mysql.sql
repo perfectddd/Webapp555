@@ -1,11 +1,11 @@
 -- ====================================================================
 -- SASSADEE NAN - MySQL 8.4 Database Optimization & Schema Design
--- Engine: InnoDB | Charset: utf8mb4 | Collation: utf8mb4_thai_520_w2
+-- Engine: InnoDB | Charset: utf8mb4 | Collation: utf8mb4_0900_ai_ci
 -- ====================================================================
 
 CREATE DATABASE IF NOT EXISTS `sassadee_db`
   CHARACTER SET utf8mb4
-  COLLATE utf8mb4_thai_520_w2;
+  COLLATE utf8mb4_0900_ai_ci;
 
 USE `sassadee_db`;
 
@@ -82,7 +82,7 @@ CREATE TABLE `tb_recuit` (
   KEY `ix_reg_year_amphur` (`reg_year`, `amphur_code`),
   KEY `ix_name` (`first_name`, `last_name`),
   KEY `ix_amphur_status` (`amphur_code`, `status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_thai_520_w2;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------------------
 -- 2. ตารางรันลำดับเลขที่ สด.1 ป้องกัน Race Condition (tb_sd1_sequence)
@@ -94,7 +94,7 @@ CREATE TABLE `tb_sd1_sequence` (
   `current_number` INT UNSIGNED NOT NULL DEFAULT 0,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`amphur_code`, `year_be`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_thai_520_w2;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Stored Procedure รันเลข สด.1 ด้วย Row-level Locking (SELECT ... FOR UPDATE)
 DELIMITER //
@@ -144,7 +144,7 @@ CREATE TABLE `summary_by_amphur` (
   `deferred_count` INT UNSIGNED NOT NULL DEFAULT 0,
   `last_refreshed` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`amphur_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_thai_520_w2;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Stored Procedure สรุปยอด
 DELIMITER //
@@ -196,7 +196,7 @@ CREATE TABLE `tb_audit_log` (
   PRIMARY KEY (`id`),
   KEY `ix_audit_user_action` (`username`, `action`),
   KEY `ix_audit_created` (`created_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_thai_520_w2;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `tb_audit_log_archive`;
 CREATE TABLE `tb_audit_log_archive` LIKE `tb_audit_log`;
@@ -214,7 +214,7 @@ CREATE TABLE `tb_amphur` (
   `shot` VARCHAR(10) DEFAULT 'อ.',
   PRIMARY KEY (`amphur_code`),
   KEY `ix_amphur_id` (`amphur_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_thai_520_w2;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ใส่ข้อมูล 15 อำเภอ จังหวัดน่าน
 INSERT INTO `tb_amphur` (`amphur_id`, `amphur_code`, `amphur_th`, `amphur_en`) VALUES
@@ -244,7 +244,7 @@ CREATE TABLE `tb_thanon` (
   PRIMARY KEY (`id`),
   KEY `ix_thanon_name` (`thanon_name`),
   KEY `ix_thanon_amphur` (`amphur_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_thai_520_w2;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `tb_sois`;
 CREATE TABLE `tb_sois` (
@@ -254,6 +254,6 @@ CREATE TABLE `tb_sois` (
   PRIMARY KEY (`id`),
   KEY `ix_sois_name` (`sois_name`),
   KEY `ix_sois_amphur` (`amphur_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_thai_520_w2;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

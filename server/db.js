@@ -27,20 +27,27 @@ const config = {
 let pool = null;
 let isConnected = false;
 
-async function initDB() {
+async function initDB(retries = 10, delay = 2000) {
   if (!mysql) return false;
-  try {
-    pool = mysql.createPool(config);
-    const conn = await pool.getConnection();
-    await conn.ping();
-    conn.release();
-    isConnected = true;
-    console.log(`[SASSADEE DB] Successfully connected to MySQL at ${config.host}:${config.port}/${config.database} (Pool size: ${config.connectionLimit})`);
-    return true;
-  } catch (err) {
-    console.warn(`[SASSADEE DB] Could not connect to MySQL (${err.message}). Using local JSON store fallback.`);
-    isConnected = false;
-    return false;
+  for (let i = 0; i < retries; i++) {
+    try {
+      pool = mysql.createPool(config);
+      const conn = await pool.getConnection();
+      await conn.ping();
+      conn.release();
+      isConnected = true;
+      console.log(`[SASSADEE DB] Successfully connected to MySQL at ${config.host}:${config.port}/${config.database} (Pool size: ${config.connectionLimit})`);
+      return true;
+    } catch (err) {
+      if (i < retries - 1) {
+        console.warn(`[SASSADEE DB] Waiting for MySQL connection... attempt ${i + 1}/${retries} (${err.message})`);
+        await new Promise(r => setTimeout(r, delay));
+      } else {
+        console.warn(`[SASSADEE DB] Could not connect to MySQL after ${retries} attempts (${err.message}). Using local JSON store fallback.`);
+        isConnected = false;
+        return false;
+      }
+    }
   }
 }
 

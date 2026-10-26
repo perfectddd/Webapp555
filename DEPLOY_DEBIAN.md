@@ -76,7 +76,7 @@ docker compose ps
 | :--- | :--- | :--- |
 | `default-storage-engine` | `InnoDB` | รองรับ Row-level lock, Foreign Key และ Transaction เต็มรูปแบบ |
 | `character-set-server` | `utf8mb4` | รองรับภาษาไทยสมบูรณ์แบบ ไม่เพี้ยน |
-| `collation-server` | `utf8mb4_thai_520_w2` | เรียงลำดับชื่อภาษาไทยตามพจนานุกรมราชบัณฑิตยสภาถูกต้อง |
+| `collation-server` | `utf8mb4_0900_ai_ci` | เรียงลำดับชื่อภาษาไทยตามพจนานุกรมและมาตรฐาน Unicode UCA 9.0 |
 | `innodb_buffer_pool_size` | 50%–70% ของ RAM | ช่วยให้ข้อมูลทะเบียนและ Index ค้างอยู่ใน RAM อ่านได้เร็วที่สุด |
 | `slow_query_log` | `1` (long_query_time = 1.0) | ตรวจจับคิวรีที่ใช้เวลาเกิน 1 วินาทีเพื่อการวิเคราะห์และใส่ Index เพิ่ม |
 | `event_scheduler` | `ON` | อัปเดตตารางสรุป Dashboard (`summary_by_amphur`) อัตโนมัติทุก 15 นาที |
